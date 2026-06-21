@@ -31,14 +31,52 @@ function findSpec(specs, group, nameIncludes) {
   return null;
 }
 function rx(v, re) { const m = v && v.match(re); return m ? m[1] : null; }
+
+// Colourful flat icons (display / chipset / camera / battery). Drop your own
+// PNGs into /public/icons/<key>.png to override — see SpecIcon below.
+const SVG_ICONS = {
+  display: (
+    <svg viewBox="0 0 24 24" fill="none">
+      <rect x="6" y="2.5" width="12" height="19" rx="2.5" fill="#5fd0ee" stroke="#0b2a33" strokeWidth="1.4"/>
+      <path d="M9.5 3h5l-.7 1.4h-3.6z" fill="#0b2a33"/>
+      <path d="M14 9.5l2.5-2.5M16.5 7H14m2.5 0v2.5M10 14.5L7.5 17M7.5 17H10m-2.5 0v-2.5" stroke="#0b2a33" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  chipset: (
+    <svg viewBox="0 0 24 24" fill="none">
+      <rect x="6" y="6" width="12" height="12" rx="2" fill="#62c462" stroke="#123" strokeWidth="1.4"/>
+      <rect x="9.5" y="9.5" width="5" height="5" rx="1" fill="#f7c948" stroke="#123" strokeWidth="1.2"/>
+      <path d="M9 6V3.5M12 6V3.5M15 6V3.5M9 18v2.5M12 18v2.5M15 18v2.5M6 9H3.5M6 12H3.5M6 15H3.5M18 9h2.5M18 12h2.5M18 15h2.5" stroke="#123" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  ),
+  camera: (
+    <svg viewBox="0 0 24 24" fill="none">
+      <path d="M3 8.5A1.5 1.5 0 014.5 7h2l1-2h9l1 2h2A1.5 1.5 0 0121 8.5v9A1.5 1.5 0 0119.5 19h-15A1.5 1.5 0 013 17.5z" fill="#f6a04d" stroke="#123" strokeWidth="1.3"/>
+      <path d="M3 12.5h18v5A1.5 1.5 0 0119.5 19h-15A1.5 1.5 0 013 17.5z" fill="#56b4e6"/>
+      <circle cx="12" cy="13" r="3.6" fill="#eef2f7" stroke="#123" strokeWidth="1.3"/>
+      <circle cx="12" cy="13" r="1.6" fill="#6b7280"/>
+    </svg>
+  ),
+  battery: (
+    <svg viewBox="0 0 24 24" fill="none">
+      <rect x="7" y="4" width="10" height="17" rx="2.2" fill="#5cc85c" stroke="#123" strokeWidth="1.4"/>
+      <rect x="10" y="2" width="4" height="2.5" rx="1" fill="#123"/>
+      <path d="M12.5 7.5l-3 5h2.3l-1 4 3.2-5.3h-2.3z" fill="#fff"/>
+    </svg>
+  ),
+};
+
+function SpecIcon({ name }) {
+  return <span className="kspec-ic">{SVG_ICONS[name] || null}</span>;
+}
+
 function keySpecs(specs) {
   if (!specs) return [];
   const out = [];
-  const d = rx(findSpec(specs, "Display", "Size"), /([\d.]+)\s*inch/i); if (d) out.push(["🖥️", "Display", `${d}″`]);
-  const chip = findSpec(specs, "Platform", "Chipset"); if (chip) out.push(["⚙️", "Chipset", chip.split("(")[0].replace(/qualcomm|mediatek/i, "").trim().slice(0, 16)]);
-  const ram = rx(findSpec(specs, "Memory", "Internal"), /(\d+)\s*GB\s*RAM/i); if (ram) out.push(["💾", "RAM", `${ram}GB`]);
-  const mp = rx(findSpec(specs, "Main Camera", "") || findSpec(specs, "Camera", ""), /(\d+)\s*MP/i); if (mp) out.push(["📷", "Camera", `${mp}MP`]);
-  const mah = rx(findSpec(specs, "Battery", "Type") || findSpec(specs, "Battery", "Capacity"), /([\d,]+)\s*mAh/i); if (mah) out.push(["🔋", "Battery", `${mah}mAh`]);
+  const d = rx(findSpec(specs, "Display", "Size"), /([\d.]+)\s*inch/i); if (d) out.push(["display", "Display", `${d}″`]);
+  const chip = findSpec(specs, "Platform", "Chipset"); if (chip) out.push(["chipset", "Chipset", chip.split("(")[0].replace(/qualcomm|mediatek/i, "").trim().slice(0, 16)]);
+  const mp = rx(findSpec(specs, "Main Camera", "") || findSpec(specs, "Camera", ""), /(\d+)\s*MP/i); if (mp) out.push(["camera", "Camera", `${mp}MP`]);
+  const mah = rx(findSpec(specs, "Battery", "Type") || findSpec(specs, "Battery", "Capacity"), /([\d,]+)\s*mAh/i); if (mah) out.push(["battery", "Battery", `${mah}mAh`]);
   return out;
 }
 
@@ -163,21 +201,35 @@ export default function ProductPage({ params }) {
           {ks.length > 0 && (
             <div className="kspec">
               {ks.map(([icon, label, val]) => (
-                <div className="kspec-item" key={label}>
-                  <span className="kspec-ic">{icon}</span><span className="kspec-v">{val}</span><span className="kspec-l">{label}</span>
+                <div className={`kspec-item ic-${icon}`} key={label}>
+                  <SpecIcon name={icon} />
+                  <div className="kspec-text"><span className="kspec-v">{val}</span><span className="kspec-l">{label}</span></div>
                 </div>
               ))}
             </div>
           )}
 
-          <div className="price-hero">
-            <div>
-              <span className="ph-lab">Best price{selColor ? ` · ${selColor}` : ""} · {storages.find((s) => s.key === selStorage)?.label}</span>
-              <span className="ph-val">{taka(low)}</span>
-              {best && <span className="ph-shop">at {best.source_name}{spread > 0 ? ` · save up to ${taka(spread)}` : ""}</span>}
+          {best ? (
+            <div className="price-hero">
+              <div className="ph-glow" />
+              <div className="ph-main">
+                <div className="ph-top">
+                  <span className="ph-badge">★ Best price</span>
+                  {spread > 0 && <span className="ph-save">Save {taka(spread)}</span>}
+                </div>
+                <span className="ph-val">{taka(low)}</span>
+                <div className="ph-at">
+                  {SHOP_ICON[best.source] &&
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img className="ph-shopicon" src={SHOP_ICON[best.source]} alt={best.source_name} />}
+                  <span>at <b>{best.source_name}</b> · {storages.find((s) => s.key === selStorage)?.label}{selColor ? ` · ${selColor}` : ""}</span>
+                </div>
+              </div>
+              <a className="ph-cta" href={best.url} target="_blank" rel="noreferrer">View deal&nbsp;↗</a>
             </div>
-            {best && <a className="bd-cta" href={best.url} target="_blank" rel="noreferrer">View deal ↗</a>}
-          </div>
+          ) : (
+            <div className="price-hero ph-na"><span>Price unavailable for this configuration</span></div>
+          )}
 
           {colors.length > 0 && (
             <div className="sel-block">

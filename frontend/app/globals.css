@@ -268,13 +268,38 @@ h1, h2, h3 { letter-spacing: -.02em; }
 .pdp-info h1 { font-size: clamp(24px, 4vw, 34px); margin: 4px 0 14px; }
 
 .price-hero {
+  position: relative; overflow: hidden;
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  background: linear-gradient(120deg, #f3fbf7, #eef0ff); border: 1px solid #d9f0e6;
-  border-radius: var(--r); padding: 16px 18px; margin: 16px 0 4px;
+  background: linear-gradient(120deg, #06351f 0%, #0b6b46 55%, #0f8a59 100%);
+  border-radius: var(--r-lg); padding: 18px 22px; margin: 18px 0 6px;
+  box-shadow: 0 16px 36px -14px rgba(13, 110, 70, .6);
 }
-.ph-lab { display: block; font-size: 12px; color: var(--ink-soft); font-weight: 600; }
-.ph-val { display: block; font-size: 30px; font-weight: 800; color: var(--accent); line-height: 1.1; }
-.ph-shop { display: block; font-size: 13px; color: var(--ink-soft); font-weight: 600; }
+.ph-glow {
+  position: absolute; top: -60%; right: -10%; width: 320px; height: 320px;
+  background: radial-gradient(circle, rgba(143,240,200,.35), transparent 60%); pointer-events: none;
+}
+.ph-main { position: relative; z-index: 1; }
+.ph-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.ph-badge {
+  font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
+  background: rgba(255,255,255,.18); color: #fff; padding: 4px 10px; border-radius: 999px;
+}
+.ph-save {
+  font-size: 11px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase;
+  background: #f7c948; color: #5a4300; padding: 4px 10px; border-radius: 999px;
+}
+.ph-val { display: block; font-size: 36px; font-weight: 800; color: #fff; line-height: 1.05; letter-spacing: -.02em; }
+.ph-at { display: flex; align-items: center; gap: 8px; margin-top: 7px; font-size: 13.5px; color: #cdeee0; font-weight: 500; }
+.ph-at b { color: #fff; font-weight: 700; }
+.ph-shopicon { width: 26px; height: 26px; border-radius: 7px; background: #fff; padding: 3px; object-fit: contain; flex: none; }
+.ph-cta {
+  position: relative; z-index: 1; flex: none; font-weight: 800; font-size: 15px;
+  color: #06351f; background: #fff; padding: 13px 24px; border-radius: 999px;
+  box-shadow: 0 8px 18px -6px rgba(0,0,0,.4); transition: transform .15s, box-shadow .15s;
+}
+.ph-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -8px rgba(0,0,0,.5); }
+.price-hero.ph-na { background: #f3f4fb; box-shadow: none; color: var(--muted); font-weight: 600; justify-content: center; }
+.price-hero.ph-na span { color: var(--muted); }
 
 .sel-block { margin-top: 18px; }
 .sel-label { font-size: 12.5px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .03em; margin-bottom: 10px; }
@@ -303,15 +328,22 @@ h1, h2, h3 { letter-spacing: -.02em; }
 .phero h1 { font-size: clamp(22px, 4vw, 32px); margin: 4px 0 14px; }
 .phero .meta { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 
-/* key spec strip */
-.kspec { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+/* key spec strip — colourful icon tiles */
+.kspec { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
 .kspec-item {
-  display: flex; flex-direction: column; align-items: flex-start;
-  background: var(--grad-soft); border: 1px solid #e6e7ff; border-radius: 12px;
-  padding: 8px 13px; min-width: 78px;
+  display: flex; align-items: center; gap: 10px;
+  background: #fff; border: 1px solid var(--line); border-radius: 14px;
+  padding: 8px 14px 8px 8px; box-shadow: var(--sh-sm); transition: transform .15s, box-shadow .15s;
 }
-.kspec-ic { font-size: 15px; }
-.kspec-v { font-weight: 800; font-size: 14px; color: var(--ink); margin-top: 2px; }
+.kspec-item:hover { transform: translateY(-2px); box-shadow: var(--sh); }
+.kspec-ic { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; flex: none; }
+.kspec-ic svg { width: 24px; height: 24px; }
+.ic-display .kspec-ic { background: #e3f6fc; }
+.ic-chipset .kspec-ic { background: #e6f7e6; }
+.ic-camera  .kspec-ic { background: #fdeede; }
+.ic-battery .kspec-ic { background: #e6f7e6; }
+.kspec-text { display: flex; flex-direction: column; line-height: 1.15; }
+.kspec-v { font-weight: 800; font-size: 14.5px; color: var(--ink); }
 .kspec-l { font-size: 11px; color: var(--muted); font-weight: 600; }
 
 /* configuration selector */
