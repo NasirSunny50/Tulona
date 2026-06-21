@@ -8,7 +8,20 @@ Warranty is not exposed by this API (TODO: locate a detail endpoint).
 """
 from __future__ import annotations
 
+import time
+
 import httpx
+
+
+def _get_retry(client: httpx.Client, url: str, params: dict, tries: int = 4):
+    """GET with retries — transient network drops shouldn't abort a bulk crawl."""
+    for attempt in range(tries):
+        try:
+            return client.get(url, params=params)
+        except httpx.HTTPError:
+            if attempt == tries - 1:
+                raise
+            time.sleep(1.5 * (attempt + 1))
 
 from app.config import settings
 from app.models import ScrapedProduct, ScrapedVariant
@@ -92,8 +105,11 @@ def fetch_products(limit: int | None = None) -> list[ScrapedProduct]:
     page, size = 1, 50
     with _client() as c:
         while True:
-            r = c.get(API, params={"page": page, "size": size,
-                                   "sortOrder": "desc", "search": ""})
+            try:
+                r = _get_retry(c, API, {"page": page, "size": size,
+                                        "sortOrder": "desc", "search": ""})
+            except httpx.HTTPError:
+                break  # persistent failure -> return what we have so far (partial)
             if r.status_code != 200:
                 break
             body = r.json()

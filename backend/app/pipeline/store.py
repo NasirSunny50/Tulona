@@ -188,8 +188,9 @@ def upsert_listing(conn, source_id: int, variant_id: int, url: str,
 
 def insert_price(conn, listing_id: int, price: Decimal | None, currency: str,
                  warranty: str | None, in_stock: bool | None) -> None:
-    # A price of 0 means "not listed / unavailable" on these sites -> store NULL.
-    if price is not None and price <= 0:
+    # A price of 0 means "not listed / unavailable"; a price under ৳1000 is a decoy
+    # element (no real phone costs that little). Either -> store NULL.
+    if price is not None and price < 1000:
         price = None
     conn.execute(
         """INSERT INTO price_history (listing_id, price, currency, warranty, in_stock)
