@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Env / secrets
+.env
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+dist/
+
+# Data / logs
+*.log
+data/
+scrape_dumps/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# temp
+backend/_imgcheck/
+/tmp/

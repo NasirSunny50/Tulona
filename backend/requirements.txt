@@ -1,0 +1,23 @@
+# Pins use >= floors so pip picks the newest cp314 binary wheels (Python 3.14).
+# Run `pip freeze > requirements.lock.txt` once happy, for reproducible installs.
+
+# Scraping
+playwright>=1.49
+httpx>=0.28
+beautifulsoup4>=4.12
+lxml>=5.3
+
+# DB
+psycopg[binary]>=3.2.10
+
+# Matching / utils
+rapidfuzz>=3.12
+pydantic>=2.10
+pydantic-settings>=2.7
+python-dotenv>=1.0
+PyYAML>=6.0
+
+# API (used in Step 6)
+fastapi>=0.115
+uvicorn[standard]>=0.34
+APScheduler>=3.10
