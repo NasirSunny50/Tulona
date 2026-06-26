@@ -125,11 +125,8 @@ h1, h2, h3 { letter-spacing: -.02em; }
 
 /* ---------- brand filter ---------- */
 .brandbar {
-  display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 12px; margin-bottom: 4px;
-  scrollbar-width: thin;
+  display: flex; flex-wrap: wrap; gap: 9px; padding: 4px 2px 16px; margin-bottom: 4px;
 }
-.brandbar::-webkit-scrollbar { height: 6px; }
-.brandbar::-webkit-scrollbar-thumb { background: #d7d9e6; border-radius: 6px; }
 .brand-chip {
   flex: none; font-family: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer;
   color: var(--ink-soft); background: #fff; border: 1px solid var(--line);

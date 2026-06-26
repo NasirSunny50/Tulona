@@ -8,7 +8,7 @@ const SHOP_ICON = {
   sumashtech: "/shops/sumashtech.png",
   rio: "/shops/rio.png",
   kry: "/shops/kry.ico",
-  dazzle: "/shops/dazzle.ico",
+  dazzle: "/shops/dazzle.svg",
 };
 const SHOP_NAME = {
   sumashtech: "Sumash Tech", rio: "Rio International", kry: "KRY International", dazzle: "Dazzle",

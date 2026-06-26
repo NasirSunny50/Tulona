@@ -5,7 +5,7 @@ const API = process.env.NEXT_PUBLIC_API || "http://127.0.0.1:8000";
 
 const SHOP_ICON = {
   sumashtech: "/shops/sumashtech.png", rio: "/shops/rio.png",
-  kry: "/shops/kry.ico", dazzle: "/shops/dazzle.ico",
+  kry: "/shops/kry.ico", dazzle: "/shops/dazzle.svg",
 };
 const SHOP_COLORS = { sumashtech: "#5b5bf6", rio: "#07b07a", kry: "#f3651e", dazzle: "#e0387b" };
 

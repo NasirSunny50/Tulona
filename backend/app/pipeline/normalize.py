@@ -142,9 +142,12 @@ _NON_PHONE_RE = re.compile(
     r"tablet|tab\s|\bpad\b|\bbook\b|laptop|notebook|macbook|"
     r"buds|\btws\b|earphone|earbud|headphone|airpod|speaker|soundbar|"
     r"watch|smartwatch|\bband\b|tracker|"
-    r"case|cover|glass|protector|tempered|charger|cable|adapter|"
+    r"case|casing|cover|glass|protector|tempered|charger|cable|adapter|"
     r"powerbank|power\s*bank|strap|holder|stand|mount|gimbal|"
-    r"keyboard|mouse|dock|stylus|pen\b|gear\b"
+    r"keyboard|mouse|dock|stylus|pen\b|gear\b|"
+    r"camera|surveillance|cctv|megapixel|ip\s*cam|webcam|"
+    r"desktop|motherboard|monitor|projector|printer|router|modem|"
+    r"drone|graphics\s*card|\bgpu\b|\bssd\b|\bhdd\b|\bpsu\b|\bram\b|\bups\b"
     r")\b",
     re.I,
 )
