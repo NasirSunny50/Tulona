@@ -19,34 +19,46 @@ def scrape_and_store(scraper, urls: list[str], *, headful: bool = False,
     and appends a fresh price_history snapshot each run -> builds the time series.
     """
     uses_browser = getattr(scraper, "USES_BROWSER", True)
-    page_ctx = browser_page(headless=not headful) if uses_browser else nullcontext(None)
+    stats = {"ok": 0, "fail": 0, "variants": 0}
 
-    ok = fail = total_variants = 0
-    with page_ctx as page:
-        with get_conn() as conn:
+    def handle(conn, page, i, url):
+        try:
+            sp = scraper.scrape_product(page, url)
+            if not sp or not sp.variants:
+                stats["fail"] += 1
+                if verbose:
+                    print(f"  [{i}/{len(urls)}] SKIP (no data): {url}")
+                return
+            summary = store_product(conn, sp)
+            conn.commit()
+            stats["variants"] += summary["variants"]
+            stats["ok"] += 1
+            if verbose:
+                print(f"  [{i}/{len(urls)}] OK {summary['brand']} | "
+                      f"{summary['model']} | {summary['variants']} variant(s)")
+        except Exception as e:
+            conn.rollback()
+            stats["fail"] += 1
+            if verbose:
+                print(f"  [{i}/{len(urls)}] ERROR {url} -> {e}")
+
+    with get_conn() as conn:
+        if uses_browser:
+            # Restart the browser every BATCH products: a single long-lived
+            # context over hundreds of pages tends to leak/hang.
+            BATCH = 40
+            for start in range(0, len(urls), BATCH):
+                chunk = urls[start:start + BATCH]
+                with browser_page(headless=not headful) as page:
+                    for j, url in enumerate(chunk):
+                        handle(conn, page, start + j + 1, url)
+                        time.sleep(settings.scrape_delay_seconds)
+        else:
             for i, url in enumerate(urls, 1):
-                try:
-                    sp = scraper.scrape_product(page, url)
-                    if not sp or not sp.variants:
-                        fail += 1
-                        if verbose:
-                            print(f"  [{i}/{len(urls)}] SKIP (no data): {url}")
-                        continue
-                    summary = store_product(conn, sp)
-                    conn.commit()
-                    total_variants += summary["variants"]
-                    ok += 1
-                    if verbose:
-                        print(f"  [{i}/{len(urls)}] OK {summary['brand']} | "
-                              f"{summary['model']} | {summary['variants']} variant(s)")
-                except Exception as e:
-                    conn.rollback()
-                    fail += 1
-                    if verbose:
-                        print(f"  [{i}/{len(urls)}] ERROR {url} -> {e}")
+                handle(conn, None, i, url)
                 time.sleep(settings.scrape_delay_seconds)
 
-    return {"label": label, "ok": ok, "fail": fail, "variants": total_variants}
+    return {"label": label, **stats}
 
 
 def store_scraped_list(products, *, label: str = "", verbose: bool = True) -> dict:

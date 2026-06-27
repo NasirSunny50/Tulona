@@ -83,9 +83,26 @@ def _parse_variant_name(name: str) -> tuple[int | None, int | None, str | None]:
 
 
 def _price_amount(price_obj) -> "object":
+    # Dazzle uses negative/zero as a placeholder for "no real price" (e.g. -1700);
+    # only a positive value is a genuine price.
     if isinstance(price_obj, dict):
-        return parse_price(str(price_obj.get("price")))
+        v = price_obj.get("price")
+        try:
+            if v is not None and float(v) > 0:
+                return parse_price(str(v))
+        except (TypeError, ValueError):
+            pass
     return None
+
+
+def _variant_in_stock(v: dict):
+    """Real availability = stock.quantity > 0. Dazzle's `status` field is
+    unreliable (says 'stock' even when quantity is 0)."""
+    stk = v.get("stock")
+    qty = stk.get("quantity") if isinstance(stk, dict) else None
+    if qty is None:
+        return None
+    return qty > 0
 
 
 def _parse_product(p: dict) -> ScrapedProduct | None:
@@ -108,8 +125,7 @@ def _parse_product(p: dict) -> ScrapedProduct | None:
         # upcoming/TBA phones carry a base "expected" price but have no priced
         # variants — the live site shows "TBA", so we must not invent a price.
         price = _price_amount(v.get("price"))
-        status = (v.get("status") or "").lower()
-        in_stock = (status == "stock") if status else None
+        in_stock = _variant_in_stock(v)
         variants.append(ScrapedVariant(
             raw_label=vname or name,
             ram_gb=ram, rom_gb=rom, color=color,
@@ -160,7 +176,7 @@ def fetch_products(limit: int | None = None) -> list[ScrapedProduct]:
                 "sort": "-hot",
                 "page[size]": 50,
                 "page[number]": page,
-                "include": "price,brand,stock,variants.price",
+                "include": "price,brand,stock,variants.price,variants.stock",
             }
             try:
                 r = _get_retry(c, API, params)

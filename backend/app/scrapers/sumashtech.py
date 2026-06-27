@@ -12,7 +12,7 @@ import httpx
 
 from app.config import settings
 from app.models import ScrapedProduct, ScrapedVariant
-from app.pipeline.normalize import parse_price, parse_ram_rom, parse_variant_string
+from app.pipeline.normalize import is_phone, parse_price, parse_ram_rom, parse_variant_string
 from app.scrapers.base import extract_jsonld, find_type
 
 SOURCE_SLUG = "sumashtech"
@@ -23,8 +23,10 @@ SITEMAP_URL = "https://www.sumashtech.com/__sitemap__/product.xml"
 # TODO(refine): replace with category-page crawl of /category/phone.
 _PHONE_SLUG_RE = re.compile(
     r"/product/[a-z0-9-]*("
-    r"galaxy-(a|s|m|z|f)\d|iphone-1\d|redmi|poco|realme-\d|narzo|infinix|tecno|"
-    r"vivo-|oppo-|nokia-|motorola|moto-|honor-|nothing-phone|pixel-\d"
+    r"galaxy|iphone|redmi|poco|xiaomi|\bmi-|realme|narzo|"
+    r"oppo|reno|find-x|vivo|iqoo|infinix|tecno|spark|camon|pova|phantom|"
+    r"honor|magic|nokia|motorola|moto-|edge-|oneplus|nord|itel|pixel|"
+    r"nothing-phone|huawei|nova-|mate-|lava|symphony|walton|samsung"
     r")[a-z0-9-]*",
     re.I,
 )
@@ -45,7 +47,7 @@ def discover(limit: int | None = None) -> list[str]:
     urls = re.findall(r"<loc>([^<]+)</loc>", resp.text)
     phones = [
         u for u in urls
-        if _PHONE_SLUG_RE.search(u) and not _NOT_PHONE_RE.search(u)
+        if _PHONE_SLUG_RE.search(u) and not _NOT_PHONE_RE.search(u) and is_phone(u)
     ]
     # de-dup, stable order
     seen: set[str] = set()

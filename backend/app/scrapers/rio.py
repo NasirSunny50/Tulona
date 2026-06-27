@@ -55,33 +55,43 @@ def _client() -> httpx.Client:
     )
 
 
+# Rio's phone listings live under these categories (brand pages only covered 4
+# brands -> we were missing ~75% of phones). store_product drops any non-phone
+# that slips through, so we can crawl broadly.
+RIO_PHONE_CATEGORIES = [
+    "mobile", "samsung-mobile", "iphone", "apple", "Xiaomi", "realme", "honor",
+    "infinix", "google", "oppo", "vivo", "tecno", "nokia", "oneplus", "itel",
+    "motorola", "huawei", "nothing", "walton", "symphony",
+]
+
+
 def discover(limit: int | None = None) -> list[str]:
-    """Collect phone product URLs from brand listing pages."""
+    """Collect phone product URLs from Rio's phone-category listing pages."""
     seen: set[str] = set()
     out: list[str] = []
     with _client() as c:
-        for brand in PHONE_BRANDS:
+        for cat in RIO_PHONE_CATEGORIES:
             page = 1
-            while page <= 10:  # safety cap
-                url = f"{BASE}/brand/{brand}?page={page}"
+            while page <= 12:  # safety cap
                 try:
-                    r = c.get(url)
+                    r = c.get(f"{BASE}/category/{cat}?page={page}")
                 except httpx.HTTPError:
                     break
                 if r.status_code != 200:
                     break
                 links = re.findall(r"/product/[a-z0-9-]+", r.text)
-                new = [f"{BASE}{l}" for l in links
-                       if _PHONE_SLUG_RE.search(l) and not _NOT_PHONE_RE.search(l)]
                 added = 0
-                for u in new:
-                    if u not in seen:
+                for l in links:
+                    u = f"{BASE}{l}"
+                    if u not in seen and not _NOT_PHONE_RE.search(l):
                         seen.add(u)
                         out.append(u)
                         added += 1
-                if added == 0:        # no new products -> stop paginating this brand
+                if added == 0 and page > 1:   # page yielded nothing new -> next category
                     break
                 page += 1
+                if limit and len(out) >= limit:
+                    return out[:limit]
     return out[:limit] if limit else out
 
 
